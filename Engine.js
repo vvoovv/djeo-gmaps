@@ -11,8 +11,6 @@ define([
 
 var GM = window.google && google.maps;
 
-var engineEvents = {onmouseover: "mouseover", onmouseout: "mouseout", onclick: "click"};
-
 var supportedLayers = {
 	ROADMAP: 1,
 	SATELLITE: 1,
@@ -99,11 +97,10 @@ return declare([Engine], {
 		return this.ge;
 	},
 	
-	connect: function(feature, event, context, method) {
+	on: function(feature, event, method, context) {
 		var connections = [];
 		// normalize the callback function
-		method = this.normalizeCallback(feature, event, context, method);
-		event = engineEvents[event];
+		method = this.normalizeCallback(feature, event, method, context);
 		array.forEach(feature.baseShapes, function(shape){
 			connections.push( GM.event.addListener(shape, event, method) );
 		});
