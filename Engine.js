@@ -12,10 +12,10 @@ define([
 var GM = window.google && google.maps;
 
 var supportedLayers = {
-	roadmap: 1,
-	satellite: 1,
-	hybrid: 1,
-	terrain: 1
+	roadmap: "ROADMAP",
+	satellite: "SATELLITE",
+	hybrid: "HYBRID",
+	terrain: "TERRAIN"
 };
 
 return declare([Engine], {
@@ -124,7 +124,7 @@ return declare([Engine], {
 	
 	enableLayer: function(/* String */layerId, /* Boolean */enabled) {
 		layerId = layerId.toLowerCase();
-		if (enabled && supportedLayers[layerId]) this.gmap.setMapTypeId( GM.MapTypeId[layerId] );
+		if (enabled && supportedLayers[layerId]) this.gmap.setMapTypeId( GM.MapTypeId[supportedLayers[layerId]] );
 	}
 });
 
