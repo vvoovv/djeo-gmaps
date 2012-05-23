@@ -84,10 +84,6 @@ return declare([Engine], {
 		return container;
 	},
 	
-	prepare: function() {
-		this.zoomTo( this.map.extent );
-	},
-	
 	appendChild: function(child, feature) {
 		child.setMap(feature.map.engine.gmap);
 	},
