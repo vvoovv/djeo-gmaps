@@ -93,7 +93,7 @@ return declare([Engine], {
 		return this.ge;
 	},
 	
-	on: function(feature, event, method, context) {
+	onForFeature: function(feature, event, method, context) {
 		var connections = [];
 		// normalize the callback function
 		method = this.normalizeCallback(feature, event, method, context);
