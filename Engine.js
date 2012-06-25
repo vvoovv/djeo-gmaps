@@ -121,6 +121,28 @@ return declare([Engine], {
 	enableLayer: function(/* String */layerId, /* Boolean */enabled) {
 		layerId = layerId.toLowerCase();
 		if (enabled && supportedLayers[layerId]) this.gmap.setMapTypeId( GM.MapTypeId[supportedLayers[layerId]] );
+	},
+	
+	_setCamera: function(kwArgs) {
+		this._set_center(kwArgs.center);
+		this._set_zoom(kwArgs.zoom);
+	},
+	
+	_set_center: function(center) {
+		this.gmap.setCenter(new GM.LatLng(center[1], center[0]));
+	},
+	
+	_get_center: function() {
+		var center = this.gmap.getCenter();
+		return [center.lng(), center.lat()];
+	},
+	
+	_set_zoom: function(zoom) {
+		this.gmap.setZoom(zoom);
+	},
+	
+	_get_zoom: function() {
+		return this.gmap.getZoom();
 	}
 });
 
