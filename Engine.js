@@ -143,6 +143,11 @@ return declare([Engine], {
 	
 	_get_zoom: function() {
 		return this.gmap.getZoom();
+	},
+	
+	_appendDiv: function(div) {
+		// we append the div directly to this.map.container
+		this.map.container.appendChild(div);
 	}
 });
 
