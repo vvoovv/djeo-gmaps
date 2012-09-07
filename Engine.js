@@ -26,6 +26,7 @@ return declare([Engine], {
 		this._require = require;
 		// set ignored dependencies
 		lang.mixin(this.ignoredDependencies, {"Highlight": 1, "Tooltip": 1});
+		this._supportedLayers = supportedLayers;
 		// initialize basic factories
 		this._initBasicFactories(Placemark({
 			map: this.map
