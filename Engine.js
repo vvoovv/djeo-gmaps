@@ -6,12 +6,13 @@ define([
 	"dojo/aspect", // after
 	"dojo/io/script", // get
 	"djeo/Engine",
-	"./Placemark"
-], function(require, declare, lang, array, aspect, script, Engine, Placemark){
+	"./Placemark",
+	"djeo/_tiles"
+], function(require, declare, lang, array, aspect, script, Engine, Placemark, supportedLayers){
 
 var GM = window.google && google.maps;
 
-var supportedLayers = {
+var supportedLayers1 = {
 	roadmap: "ROADMAP",
 	satellite: "SATELLITE",
 	hybrid: "HYBRID",
@@ -119,7 +120,7 @@ return declare([Engine], {
 		
 	},
 	
-	enableLayer: function(/* String */layerId, /* Boolean */enabled) {
+	enableLayer1: function(/* String */layerId, /* Boolean */enabled) {
 		layerId = layerId.toLowerCase();
 		if (enabled && supportedLayers[layerId]) this.gmap.setMapTypeId( GM.MapTypeId[supportedLayers[layerId]] );
 	},
