@@ -12,12 +12,15 @@ define([
 
 var GM = window.google && google.maps;
 
-var supportedLayers1 = {
+var wellKnownLayers = {
 	roadmap: "ROADMAP",
 	satellite: "SATELLITE",
 	hybrid: "HYBRID",
 	terrain: "TERRAIN"
 };
+
+// mixing supportedLayers and wellKnownLayers
+supportedLayers = lang.mixin(lang.mixin({}, supportedLayers), wellKnownLayers);
 
 return declare([Engine], {
 	
@@ -120,9 +123,15 @@ return declare([Engine], {
 		
 	},
 	
-	enableLayer1: function(/* String */layerId, /* Boolean */enabled) {
-		layerId = layerId.toLowerCase();
-		if (enabled && supportedLayers[layerId]) this.gmap.setMapTypeId( GM.MapTypeId[supportedLayers[layerId]] );
+	enableLayer: function(/* String */layerId, /* Boolean */enabled) {
+		// check if layerId is in wellKnownLayers
+		var layerId_ = layerId.toLowerCase();
+		if (layerId_ in wellKnownLayers) {
+			if (enabled) this.gmap.setMapTypeId( GM.MapTypeId[wellKnownLayers[layerId_]] );
+		}
+		else {
+			this.inherited(arguments);
+		}
 	},
 	
 	_setCamera: function(kwArgs) {
