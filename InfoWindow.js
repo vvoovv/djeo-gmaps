@@ -14,7 +14,7 @@ return declare(null, {
 			iw = this.infoWindow,
 			content = cs.info ? cs.info(feature) : this.content(feature)
 		;
-		iw.setPosition(event.event.latLng);
+		iw.setPosition(event.nativeEvent.latLng);
 		iw.setContent(content);
 		iw.open(this.map.engine.gmap);
 	}
