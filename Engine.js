@@ -17,10 +17,24 @@ var wellKnownLayers = {
 	satellite: "SATELLITE",
 	hybrid: "HYBRID",
 	terrain: "TERRAIN"
-};
+},
+mapEvents = {
+	zoom_changed: 1,
+	click: 1,
+	mousemove: 1
+}
+;
 
 // mixing supportedLayers and wellKnownLayers
 supportedLayers = lang.mixin(lang.mixin({}, supportedLayers), wellKnownLayers);
+
+function _wrapListener(listener) {
+	return {
+		remove: function() {
+			GM.event.removeListener(listener);
+		}
+	}
+}
 
 return declare([Engine], {
 	
@@ -112,6 +126,25 @@ return declare([Engine], {
 		array.forEach(connections, function(connection){
 			GM.event.removeListener(connection);
 		});
+	},
+	
+	onForMap: function(event, method, context) {
+		return _wrapListener(
+			GM.event.addListener(this.gmap, event, function(e){
+				var ll = e.latLng;
+				method.call(context, {
+					mapCoords: [ll.lng(), ll.lat()]
+				});
+			})
+		);
+	},
+	
+	_on_zoom_changed: function(event, method, context) {
+		return _wrapListener(
+			GM.event.addListener(this.gmap, event, function(){
+				method.call(context);
+			})
+		);
 	},
 	
 	zoomTo: function(extent) {
