@@ -1,7 +1,7 @@
 define([
 	"require",
 	"dojo/_base/declare", // declare
-	"dojo/_base/lang", // mixin, hitch, isArray
+	"dojo/_base/lang", // mixin, hitch, isArray, isString
 	"dojo/_base/array", // forEach
 	"dojo/aspect", // after
 	"dojo/io/script", // get
@@ -156,11 +156,16 @@ return declare([Engine], {
 		
 	},
 	
-	enableLayer: function(/* String */layerId, /* Boolean */enabled) {
-		// check if layerId is in wellKnownLayers
-		var layerId_ = layerId.toLowerCase();
-		if (layerId_ in wellKnownLayers) {
-			if (enabled) this.gmap.setMapTypeId( GM.MapTypeId[wellKnownLayers[layerId_]] );
+	enableLayer: function(/* String|Object */layerId, /* Boolean */enabled) {
+		if (lang.isString(layerId)) {
+			// check if layerId is in wellKnownLayers
+			var layerId_ = layerId.toLowerCase();
+			if (layerId_ in wellKnownLayers) {
+				if (enabled) this.gmap.setMapTypeId( GM.MapTypeId[wellKnownLayers[layerId_]] );
+			}
+			else {
+				this.inherited(arguments);
+			}
 		}
 		else {
 			this.inherited(arguments);
