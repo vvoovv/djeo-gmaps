@@ -20,8 +20,8 @@ var wellKnownLayers = {
 },
 mapEvents = {
 	zoom_changed: 1,
-	click: 1,
-	mousemove: 1
+	click: "click",
+	mousemove: "mousemove"
 }
 ;
 
@@ -54,9 +54,12 @@ return declare([Engine], {
 	initialize: function(/* Function */readyFunction) {
 		if (GM) {
 			// the first case: Google Maps API is completely loaded
-			this.map.projection = "EPSG:4326";
-			var gmap = new GM.Map(this.map.container, {
+			var map = this.map;
+			map.projection = "EPSG:4326";
+			var gmap = new GM.Map(map.container, {
 				zoom: 0,
+				minZoom: map.minZoom,
+				maxZoom: map.maxZoom,
 				center: new GM.LatLng(0, 0),
 				disableDefaultUI: true,
 				disableDoubleClickZoom: true,
@@ -133,7 +136,8 @@ return declare([Engine], {
 			GM.event.addListener(this.gmap, event, function(e){
 				var ll = e.latLng;
 				method.call(context, {
-					mapCoords: [ll.lng(), ll.lat()]
+					mapCoords: [ll.lng(), ll.lat()],
+					nativeEvent: e
 				});
 			})
 		);
