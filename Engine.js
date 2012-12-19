@@ -145,7 +145,15 @@ return declare([Engine], {
 	
 	_on_zoom_changed: function(event, method, context) {
 		return _wrapListener(
-			GM.event.addListener(this.gmap, event, function(){
+			GM.event.addListener(this.gmap, "zoom_changed", function(){
+				method.call(context);
+			})
+		);
+	},
+
+	_on_extent_changed: function(event, method, context) {
+		return _wrapListener(
+			GM.event.addListener(this.gmap, "bounds_changed", function(){
 				method.call(context);
 			})
 		);
@@ -175,7 +183,12 @@ return declare([Engine], {
 			this.inherited(arguments);
 		}
 	},
-	
+
+	getLayerModuleId: function(/* String */layerId) {
+		if (layerId.toLowerCase() in wellKnownLayers) return null;
+		return this.inherited(arguments);
+	},
+
 	_setCamera: function(kwArgs) {
 		this._set_center(kwArgs.center);
 		this._set_zoom(kwArgs.zoom);
@@ -196,6 +209,14 @@ return declare([Engine], {
 	
 	_get_zoom: function() {
 		return this.gmap.getZoom();
+	},
+	
+	_get_extent: function() {
+		var bounds = this.gmap.getBounds(),
+			sw = bounds.getSouthWest(),
+			ne = bounds.getNorthEast()
+		;
+		return [sw.lng(), sw.lat(), ne.lng(), ne.lat()];
 	}
 });
 
