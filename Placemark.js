@@ -4,9 +4,10 @@ define([
 	"dojo/_base/array", // forEach
 	"dojo/_base/Color",
 	"dojo/has",
+	"djeo/util/_base",
 	"djeo/common/Placemark",
 	"dojo/_base/sniff"
-], function(declare, lang, array, Color, has, P){
+], function(declare, lang, array, Color, has, u, P){
 
 var GM = window.google && google.maps;
 
@@ -81,9 +82,12 @@ var Placemark = declare([P], {
 			isVectorShape = true,
 			scale = P.getScale(calculatedStyle, specificStyle, specificShapeStyle),
 			mi = marker.getIcon(), // mi stands for markerImage
-			miExists = mi ? true : false;
+			miExists = mi ? true : false,
+			heading = feature.orientation,
+			hasHeading = feature.map.simulateOrientation && heading !== undefined
+		;
 
-		if (!mi) mi = new GM.MarkerImage();
+		if (!mi) mi = {};
 
 		if (!shapeType && src) isVectorShape = false;
 		else if (!P.shapes[shapeType] && !miExists)
@@ -91,6 +95,12 @@ var Placemark = declare([P], {
 			shapeType = P.defaultShapeType;
 
 		var url = this._getIconUrl(isVectorShape, shapeType, src);
+		if (hasHeading) {
+			if (lang.isObject(heading)) heading = heading.heading;
+			heading = Math.round(u.radToDeg(heading));
+			if (heading<0) heading = 360 + heading;
+			if (url) url = getSpriteUrl(feature, url);
+		}
 		if (url) mi.url = url;
 
 		var size = isVectorShape ? P.getSize(calculatedStyle, specificStyle, specificShapeStyle) : P.getImgSize(calculatedStyle, specificStyle, specificShapeStyle);
@@ -98,7 +108,11 @@ var Placemark = declare([P], {
 			var anchor = isVectorShape ? [size[0]/2, size[1]/2] : P.getAnchor(calculatedStyle, specificStyle, specificShapeStyle, size);
 			mi.size = new GM.Size(scale*size[0], scale*size[1]);
 			mi.anchor = new GM.Point(scale*anchor[0], scale*anchor[1]);
-			mi.scaledSize = new GM.Size(scale*size[0], scale*size[1])
+			mi.scaledSize = new GM.Size(scale*size[0], scale*size[1]);
+			if (hasHeading) {
+				mi.origin = new GM.Point(0, size[1]*heading);
+				mi.scaledSize.height = 360*mi.scaledSize.height;
+			}
 		}
 		else if (miExists) {
 			// check if we can apply relative scale (rScale)
@@ -110,6 +124,8 @@ var Placemark = declare([P], {
 				mi.anchor.y *= rScale;
 				mi.scaledSize.width *= rScale;
 				mi.scaledSize.height *= rScale;
+				
+				if (hasHeading) mi.origin.y *= rScale;
 			}
 		}
 
@@ -170,12 +186,27 @@ var Placemark = declare([P], {
 	makeText: function(feature, calculatedStyle) {
 	},
 	
-	translate: function(position, feature) {
-		feature.baseShapes[0].setPosition(new GM.LatLng(position[1], position[0]));
+	setCoords: function(coords, feature) {
+		feature.baseShapes[0].setPosition(new GM.LatLng(coords[1], coords[0]));
 	},
-
-	rotate: function(orientation, feature) {
-
+	
+	setOrientation: function(o, feature) {
+		// orientation is actually heading
+		if (!feature.map.simulateOrientation) return;
+		var marker = feature.baseShapes[0],
+			mi = marker.getIcon(), // mi stands for markerImage
+			heading = Math.round(u.radToDeg(o)),
+			size = mi.size
+		;
+		var url = feature.reg.url;
+		if (!url) {
+			url = getSpriteUrl(feature, mi.url);
+		}
+		if (heading<0) heading = 360 + heading;
+		mi.url = url;
+		mi.origin = new GM.Point(0, size.height*heading);
+		mi.scaledSize.height = 360*size.height;
+		marker.setIcon(mi);
 	}
 });
 
@@ -183,10 +214,20 @@ Placemark.init = function() {
 	GM = google.maps;
 };
 
-var getColor = function(c) {
+function getColor(c) {
 	// Google Maps API doesn't support CSS3 colors for IE
 	return has("ie") ? (new Color(c)).toHex() : c;
 };
+
+function getSpriteUrl(feature, url) {
+	var fileName = url.match(/\b\w+\.\w{3,4}$/)[0],
+		fileName_ = fileName.split("."),
+		path = url.substr(0, url.length-fileName_[0].length-fileName_[1].length-1)
+	;
+	url = path + fileName_[0] + "_" + fileName_[1] + "/" + fileName;
+	feature.reg.url = url;
+	return url;
+}
 
 return Placemark;
 });
